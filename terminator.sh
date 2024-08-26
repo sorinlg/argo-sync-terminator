@@ -53,7 +53,7 @@ echo ""
 echo "====================================================="
 echo ":: Sync Terminator :: Syncing Application"
 echo "====================================================="
-argocd app sync "${APPLICATION_NAME}" --prune --async
+argocd app sync "${APPLICATION_NAME}" --prune --async --apply-out-of-sync-only --server-side
 
 # Show the new sync status
 echo ""
