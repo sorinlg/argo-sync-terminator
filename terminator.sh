@@ -44,16 +44,37 @@ if [[ "${operationStatePhase}" == "Running" ]]; then
   echo ""
   echo "====================================================="
   echo ":: Sync Terminator :: Terminating Current Operation"
+  argocd app terminate-op "${APPLICATION_NAME}" \
+    && echo "Operation terminated successfully"
   echo "====================================================="
-  argocd app terminate-op "${APPLICATION_NAME}"
+
+  # Show the current sync status
+  echo ""
+  echo "====================================================="
+  echo ":: Sync Terminator :: Refresh Sync Status"
+  operationStatePhase=$(argocd app get "${APPLICATION_NAME}" --show-operation --refresh -o json | jq -r '.status.operationState.phase')
+  echo "Current Operation State Phase: ${operationStatePhase}"
+  echo "====================================================="
 fi
 
-# Sync the application
-echo ""
-echo "====================================================="
-echo ":: Sync Terminator :: Syncing Application"
-echo "====================================================="
-argocd app sync "${APPLICATION_NAME}" --prune --async --apply-out-of-sync-only --server-side
+## Only try to sync the application if the new operation status is not in progress
+if [[ "${operationStatePhase}" != "Running" ]]; then
+  # Sync the application
+  echo ""
+  echo "====================================================="
+  echo ":: Sync Terminator :: Syncing Application"
+  argocd app sync "${APPLICATION_NAME}" --prune --async --apply-out-of-sync-only --server-side \
+    && echo "Application synced successfully"
+  echo "====================================================="
+
+  # Show the current sync status
+  echo ""
+  echo "====================================================="
+  echo ":: Sync Terminator :: Refresh Sync Status"
+  operationStatePhase=$(argocd app get "${APPLICATION_NAME}" --show-operation --refresh -o json | jq -r '.status.operationState.phase')
+  echo "Current Operation State Phase: ${operationStatePhase}"
+  echo "====================================================="
+fi
 
 # Show the new sync status
 echo ""
