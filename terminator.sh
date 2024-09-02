@@ -58,7 +58,7 @@ if [[ "${operationStatePhase}" == "Running" ]]; then
 fi
 
 ## Only try to sync the application if the new operation status is not in progress
-if [[ "${operationStatePhase}" != "Running" ]]; then
+if [[ "${operationStatePhase}" != "Running" ]] && [[ "${operationStatePhase}" != "Terminating" ]]; then
   # Sync the application
   echo ""
   echo "====================================================="
